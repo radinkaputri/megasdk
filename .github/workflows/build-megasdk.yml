@@ -46,8 +46,8 @@ jobs:
       # Step 4: Clone MEGA SDK and build
       - name: Build MEGA SDK
         run: |
-          # Set working directory to /root
-          cd /root
+          # Set working directory to /github/workspace
+          cd /github/workspace
           git clone https://github.com/meganz/sdk.git --depth=1 -b v4.8.0 sdk
           cd sdk
           rm -rf .git
@@ -58,7 +58,7 @@ jobs:
       # Step 5: Build Python bindings for MEGA SDK
       - name: Build Python bindings for MEGA SDK
         run: |
-          cd /root/sdk/bindings/python
+          cd /github/workspace/sdk/bindings/python
           python3.12 setup.py bdist_wheel
 
       # Step 6: Upload MEGA SDK wheel as GitHub Actions artifact
@@ -66,10 +66,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: megasdk
-          path: /root/sdk/bindings/python/dist/megasdk-4.8.0-*.whl
+          path: /github/workspace/sdk/bindings/python/dist/megasdk-4.8.0-*.whl
 
       # Step 7: Clean up
       - name: Clean up
         run: |
-          rm -rf /root/sdk
+          rm -rf /github/workspace/sdk
           
