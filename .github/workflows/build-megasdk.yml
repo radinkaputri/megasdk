@@ -41,7 +41,8 @@ jobs:
             libsodium-dev \
             libssl-dev \
             libcurl4-openssl-dev \
-            python3-pip
+            python3-pip \
+            libcrypto++-dev
 
       # Step 4: Clone MEGA SDK and build
       - name: Build MEGA SDK
