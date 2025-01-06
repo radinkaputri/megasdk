@@ -1,0 +1,76 @@
+name: Build MEGA SDK
+
+on:
+  push:
+    branches:
+      - main  # Ganti dengan cabang utama Anda
+  pull_request:
+    branches:
+      - main  # Ganti dengan cabang utama Anda
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code from repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python 3.12
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Step 3: Install dependencies for MEGA SDK build
+      - name: Install dependencies for MEGA SDK
+        run: |
+          sudo apt-get update && sudo apt-get upgrade -y
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            build-essential \
+            cmake \
+            g++ \
+            gcc \
+            libtool \
+            make \
+            pkg-config \
+            python3-dev \
+            libsodium-dev \
+            libssl-dev \
+            libcurl4-openssl-dev \
+            python3-pip
+
+      # Step 4: Clone MEGA SDK and build
+      - name: Build MEGA SDK
+        run: |
+          # Set working directory
+          mkdir -p /usr/src/app
+          cd /usr/src/app
+          git clone https://github.com/meganz/sdk.git --depth=1 -b v4.8.0 sdk
+          cd sdk
+          rm -rf .git
+          autoupdate -fIv && ./autogen.sh
+          ./configure --disable-silent-rules --enable-python --with-sodium --disable-examples
+          make -j$(nproc --all)
+
+      # Step 5: Build Python bindings for MEGA SDK
+      - name: Build Python bindings for MEGA SDK
+        run: |
+          cd /usr/src/app/sdk/bindings/python
+          python3.12 setup.py bdist_wheel
+
+      # Step 6: Upload MEGA SDK wheel as GitHub Actions artifact
+      - name: Upload MEGA SDK wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: megasdk
+          path: /usr/src/app/sdk/bindings/python/dist/megasdk-4.8.0-*.whl
+
+      # Step 7: Clean up
+      - name: Clean up
+        run: |
+          rm -rf /usr/src/app/sdk
+          
